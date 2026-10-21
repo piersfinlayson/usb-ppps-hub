@@ -26,5 +26,7 @@ jobs:
       - name: Install Git and Poppler
         run: apt-get update && apt-get install -y --no-install-recommends git poppler-utils
       - uses: actions/checkout@v4
+      - name: Add the checkout to git's safe directories
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Check the design
         run: scripts/check_all.sh build
