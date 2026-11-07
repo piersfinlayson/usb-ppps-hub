@@ -11,6 +11,8 @@ Install:
 - [KiCad 9](https://www.kicad.org/download/)
 - Python 3 and Git
 - Poppler, for the PNG renders (`brew install poppler` on macOS, `poppler-utils` on Linux)
+- CMake and the Arm GNU Toolchain (`arm-none-eabi-gcc`), for the EEPROM programmer
+- [picotool](https://github.com/raspberrypi/picotool) 2.1.1 or later, for programming a hub
 
 The scripts use KiCad's default install, and `kicad-cli` from the PATH if it's present. If your KiCad is elsewhere, set these environment variables:
 
@@ -105,7 +107,7 @@ scripts/render.sh
 
 ## Version, Commit and Source Location
 
-The version in `VERSION` is printed in the schematic's title block and on the silkscreen.
+The version in `VERSION` is the board version. It is printed in the schematic's title block and on the silkscreen, and written to the EEPROM as bcdDevice. Change it only when the board design is modified.
 
 `generate.sh` sets the commit on the silkscreen to the short hash of HEAD.
 
@@ -113,7 +115,50 @@ https://piers.rocks on the left edge is `SOURCE_LOCATION` in `scripts/usb_hub_pc
 
 ## EEPROM Image
 
-The image is built from the EEPROM contents table in [spec.md](spec.md#hub-configuration).
+The image is built from the EEPROM contents table in [spec.md](spec.md#hub-configuration):
+- A value in double quotes is interpreted as a string.
+- The string must be the correct length for the range.
+- `VERSION` is the version in the `VERSION` file, used for bcdDevice.
+
+## EEPROM Programmer
+
+The EEPROM is programmed using a Raspberry Pi Pico or Pico 2 using:
+- Pico firmware in `programmer/main.c`
+- the `programmer/program.py` script to control it from a PC/Mac/Linux host
+
+To build the firmware:
+
+```bash
+scripts/build_programmer.sh
+```
+
+This builds in `build/` and copies the firmware to:
+
+- `programmer/rp2040.uf2` for a Pico
+- `programmer/rp2350.uf2` for a Pico 2
+
+`--clean` deletes the build folders first.
+
+The Pico SDK at `PICO_SDK_PATH` is used. If that isn't set, pico-sdk 2.2.0 is cloned into `build/pico-sdk`.
+
+If picotool 2.1.1 or later isn't installed, the SDK builds one in `build/picotool`. This requires a C++ compiler. That picotool doesn't have USB support so it cannot be used to program a hub.
+
+Wire a Pico or Pico 2 to the hub as described in the [README](README.md#programming-the-eeprom). To program the hub with the EEPROM image from spec.md:
+
+```bash
+scripts/program_hub.sh
+```
+
+This:
+
+- writes the EEPROM image to `build/`
+- builds the firmware
+- runs `program.py`
+
+Options, passed to `program.py`:
+
+- `--serial` sets the serial number. Otherwise it is a random 64-bit value from the OS's random number generator.
+- `--board-version` sets bcdDevice. Otherwise it is the version from the `VERSION` file.
 
 ## JLCPCB Files
 
@@ -129,14 +174,16 @@ If a part is rotated or shifted in JLC's preview, add a correction for its LCSC 
 scripts/check_all.sh build
 ```
 
-This runs the schematic and board checks and builds the EEPROM image. CI runs it with KiCad 9.0.7.
+This runs the schematic and board checks and builds the EEPROM image. CI runs it with KiCad 9.0.7 and then `scripts/build_programmer.sh --clean`.
 
 ## Releasing
 
-1. Set the version in `VERSION`.
-2. Date the version's section in [CHANGELOG.md](CHANGELOG.md), for example `## v0.1.0 - 2026-10-21`.
+A release is named after the board version in `VERSION`. The first release for a board version is named the version, for example v0.1.0. Later releases for the same board version add a number, for example v0.1.0-2.
+
+1. If the board design has been modified, set the new version in `VERSION`.
+2. Date the release's section in [CHANGELOG.md](CHANGELOG.md), for example `## v0.1.0-2 - 2026-11-07`.
 3. Commit.
-4. Tag the commit with the version and push the tag.
+4. Tag the commit with the release name and push the tag.
 
 The Release workflow creates a GitHub release with the changelog section as its notes. The release contains:
 
@@ -145,6 +192,7 @@ The Release workflow creates a GitHub release with the changelog section as its 
 - `usb-ppps-hub-eeprom.bin`
 - `usb-ppps-hub-schematic.pdf`
 - `usb-ppps-hub-kicad.zip`, the KiCad project with LICENSE and NOTICE
+- `usb-ppps-hub-programmer.zip`, the EEPROM programmer with `program.py`
 
 `scripts/release.sh v0.1.0` writes the same files to `build/release/`.
 
@@ -184,6 +232,11 @@ The UK HS code for a USB hub is 8471 80 00 00.
 | `scripts/check_all.sh` | Combined check script |
 | `scripts/generate.sh` | Combined generate script |
 | `scripts/release.sh` | Release file writer |
+| `scripts/build_programmer.sh` | EEPROM programmer build script |
+| `scripts/program_hub.sh` | Hub programming script using spec.md |
+| `programmer/main.c` | EEPROM programmer firmware |
+| `programmer/CMakeLists.txt` | EEPROM programmer build configuration |
+| `programmer/program.py` | Hub programming script using an EEPROM image |
 | `scripts/changelog.py` | Changelog section printer |
 | `.github/workflows/` | GitHub Actions check and release workflows |
 | `kicad/` | Generated KiCad project and schematic PDF |

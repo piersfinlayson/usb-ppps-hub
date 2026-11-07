@@ -4,8 +4,6 @@ A 4-port USB 2.0 hub with USB-C connectors and per-port power switching (PPPS). 
 
 <img src="images/usb-ppps-hub.png" alt="USB PPPS Hub" width="640">
 
-<em>Currently untested - order at your own risk.</em>
-
 ## Files
 
 Download the fab files, EEPROM image, KiCad project and schematic PDF from [Releases](../../releases) or generate them with `scripts/generate.sh`.
@@ -22,36 +20,36 @@ Upload the BOM `usb-ppps-hub-bom.csv` and CPL `usb-ppps-hub-cpl.csv`, and check 
 
 ## Programming the EEPROM
 
-The EEPROM on board must be programmed with `usb-ppps-hub-eeprom.bin` before the hub will operate.
+The hub's EEPROM must be programmed with `usb-ppps-hub-eeprom.bin` before the hub will operate.
 
-### Programming with a Raspberry Pi
+These instructions explain how to use a Raspberry Pi Pico or Pico 2 to program it.
 
-You can use a Raspberry Pi with I²C enabled (`sudo raspi-config nonint do_i2c 0`).
+1. Install [picotool](https://github.com/raspberrypi/picotool) 2.1.1 or later and Python 3.
 
-Solder or press a 1x5 pin header into the holes labelled 3V3 to RST on the left edge and wire it to the Pi:
+2. Solder or press a 1x4 pin header into GND, SDA, SCL and RST and wire it to the Pico:
 
-| Header | Pi |
-| --- | --- |
-| 3V3 | Not connected |
-| GND | Pin 6 (GND) |
-| SDA | Pin 3 (GPIO2) |
-| SCL | Pin 5 (GPIO3) |
-| RST | Pin 9 (GND) |
+   | Header | Pico |
+   | --- | --- |
+   | GND | Pin 8 (GND) |
+   | SDA | Pin 6 (GP4) |
+   | SCL | Pin 7 (GP5) |
+   | RST | Pin 9 (GP6) |
 
-Power the board by plugging HOST into one of the Pi's USB ports and write the image:
+3. Download `usb-ppps-hub-eeprom.bin` and `usb-ppps-hub-programmer.zip` from [Releases](../../releases) into the same folder as each other and unzip `usb-ppps-hub-programmer.zip`.
 
-```bash
-sudo modprobe at24
-echo 24c02 0x50 | sudo tee /sys/bus/i2c/devices/i2c-1/new_device
-sudo dd if=usb-ppps-hub-eeprom.bin of=/sys/bus/i2c/devices/1-0050/eeprom
-sudo cmp usb-ppps-hub-eeprom.bin /sys/bus/i2c/devices/1-0050/eeprom
-echo 0x50 | sudo tee /sys/bus/i2c/devices/i2c-1/delete_device
-```
+4. Power the board by plugging HOST into a powered USB port.
 
-`cmp` should print nothing if the EEPROM matches the image programmed.
+5. Hold BOOTSEL on the Pico while you connect it to your computer. In the folder you downloaded the files from step 3 to, run:
 
+   ```bash
+   python3 programmer/program.py usb-ppps-hub-eeprom.bin
+   ```
 
-Disconnect the header and the hub should boot. You can check this on the Pi with `sudo lsusb -v -d 0424:2514` which should display `Per-port power switching`.
+   This programs the hub with a randomly generated, highly likely to be unique, serial number.
+
+   On success it should output `Programmed and verified`.
+
+6. To check the hub works, install [uhubctl](https://github.com/mvp/uhubctl) and run `sudo uhubctl`. It should list the hub as `[1209:f543 piers.rocks USB PPPS Hub <serial number>, USB 2.00, 4 ports, ppps]`.
 
 ## Using the hub
 

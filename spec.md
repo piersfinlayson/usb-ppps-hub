@@ -74,16 +74,16 @@ The hub is configured from the I²C EEPROM: CFG_SEL[1:0] = 11. The EEPROM is req
 - **Blank EEPROM:** leaves the hub misconfigured. Program it in-circuit before first use.
 - **Programming:** hold RESET_N low to tri-state the hub's SDA/SCL, then write the EEPROM from the programming header.
 
-**EEPROM contents.** Addresses not listed are 0x00.
+**EEPROM contents.** Addresses not listed are 0x00. Strings are UTF-16LE.
 
 | Address | Value | Meaning |
 | --- | --- | --- |
-| 00h-01h | 24 04 | VID 0x0424 (Microchip default) |
-| 02h-03h | 14 25 | PID 0x2514 |
-| 04h-05h | B3 0B | Device ID 0x0BB3 |
+| 00h-01h | 09 12 | VID 0x1209 (pid.codes) |
+| 02h-03h | 43 F5 | PID 0xF543 |
+| 04h-05h | VERSION | bcdDevice: the board version from VERSION, 0x0010 for v0.1.0 |
 | 06h | 9B | Microchip default. Individual port power switching, individual over-current sensing, multi-TT, EOP generation disabled. The self-powered bit is overridden by DYNAMIC |
 | 07h | A0 | DYNAMIC = 1 (automatic self/bus switching from LOCAL_PWR), over-current timer 8 ms |
-| 08h | 02 | Microchip default (string descriptors off) |
+| 08h | 03 | String descriptors on. Other bits are Microchip's default |
 | 09h | 00 | All ports removable |
 | 0Ah-0Bh | 00 00 | All ports enabled |
 | 0Ch | 01 | Max power, self-powered: 2 mA |
@@ -91,6 +91,13 @@ The hub is configured from the I²C EEPROM: CFG_SEL[1:0] = 11. The EEPROM is req
 | 0Eh | 01 | Hub controller current, self-powered: 2 mA |
 | 0Fh | 32 | Hub controller current, bus-powered: 100 mA |
 | 10h | 32 | Port power-on time: 100 ms |
+| 11h-12h | 04 09 | Language ID 0x0409, US English, high byte first |
+| 13h | 0B | Manufacturer string length: 11 characters |
+| 14h | 0C | Product string length: 12 characters |
+| 15h | 10 | Serial number length: 16 characters |
+| 16h-2Bh | "piers.rocks" | Manufacturer string |
+| 54h-6Bh | "USB PPPS Hub" | Product string |
+| 92h-B1h | "0000000000000000" | Serial number. The programmer replaces it with a random 64-bit value |
 | D0h | 00 | Battery charging off on all ports |
 | FAh-FCh | 00 | D+/D- not swapped, ports not remapped |
 
