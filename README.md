@@ -18,7 +18,7 @@ To have JLCPCB make and assemble the board, upload the gerbers `usb-ppps-hub-ger
 
 Upload the BOM `usb-ppps-hub-bom.csv` and CPL `usb-ppps-hub-cpl.csv`, and check the parts' positions in JLC's preview before you place the order.
 
-## Programming the EEPROM
+## Programming the Hub
 
 The hub's EEPROM must be programmed with `usb-ppps-hub-eeprom.bin` before the hub will operate.
 
@@ -51,13 +51,13 @@ These instructions explain how to use a Raspberry Pi Pico or Pico 2 to program i
 
 6. To check the hub works, install [uhubctl](https://github.com/mvp/uhubctl) and run `sudo uhubctl`. It should list the hub as `[1209:f543 piers.rocks USB PPPS Hub <serial number>, USB 2.00, 4 ports, ppps]`.
 
-## Using the hub
+## Using the Hub
 
 Plug the host into the HOST port and devices into ports 1 to 4.
 
 The hub will run either being powered by the host, or from an external 3A supply if you plug one into 5V IN. On external power the hub can supply up to 2A across all ports. Plugging or unplugging an external supply causes the hub to briefly disconnect, turn its ports off and reconnect.
 
-Only plug USB devices into ports 1 to 4, not USB hosts.
+Only plug USB devices, not hosts, into ports 1 to 4.
 
 ## Using [uhubctl](https://github.com/mvp/uhubctl)
 
@@ -67,7 +67,9 @@ Only plug USB devices into ports 1 to 4, not USB hosts.
 sudo uhubctl -l <location> -p 2 -a off
 ```
 
-Use `-a on` to turn it back on.
+Use `-a on` to turn the port back on.
+
+Port state is not remembered across hub restarts.
 
 ## Design
 
