@@ -8,13 +8,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: kicad/kicad:9.0.7
+      image: kicad/kicad:9.0.7-full
       options: --user root
     steps:
-      - name: Install Git, Poppler and the Pico build tools
+      - name: Install Git, Poppler, curl, the OpenSCAD libraries and the Pico build tools
         run: >-
-          apt-get update && apt-get install -y --no-install-recommends git ca-certificates poppler-utils cmake make g++
+          apt-get update && apt-get install -y --no-install-recommends git ca-certificates poppler-utils curl
+          libegl1 libopengl0 libgl1 cmake make g++
           gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+      - name: Install OpenSCAD
+        run: |
+          curl -sSfLo /tmp/openscad.AppImage https://files.openscad.org/snapshots/OpenSCAD-2026.10.11-x86_64.AppImage
+          chmod +x /tmp/openscad.AppImage
+          cd /opt && /tmp/openscad.AppImage --appimage-extract >/dev/null
+          echo OPENSCAD=/opt/squashfs-root/AppRun >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - name: Add the checkout to git's safe directories
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"

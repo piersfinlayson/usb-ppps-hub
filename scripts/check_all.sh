@@ -1,9 +1,10 @@
 #!/bin/sh
-# Run the checks and build the EEPROM image. Exits 1 on any problem.
+# Run the checks, build the case and build the EEPROM image. Exits 1 on any problem.
 cd "$(dirname "$0")/.."
 D=${1:-build}
 status=0
 scripts/check.sh "$D" || status=1
 scripts/check_pcb.sh "$D" || status=1
+scripts/case.sh "$D/usb-ppps-hub.kicad_pcb" "$D/case" || status=1
 python3 scripts/eeprom.py "$D" || status=1
 exit $status

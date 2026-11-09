@@ -12,3 +12,4 @@ fp-info-cache
 _autosave-*
 \#auto_saved_files\#
 /programmer/*.uf2
+.vscode

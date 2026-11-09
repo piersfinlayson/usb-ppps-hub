@@ -7,6 +7,12 @@ All notable changes between versions are documented in this file.
 TODO:
 - All traces must be 0.4mm from edges to enable v-cutting for panelisation.
 
+## v0.1.0-3 - 2026-11-09
+
+Board design: v0.1.0, unmodified.
+
+A 3D-printed case.
+
 ## v0.1.0-2 - 2026-11-07
 
 Board design: v0.1.0, unmodified.

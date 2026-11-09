@@ -71,6 +71,14 @@ Use `-a on` to turn the port back on.
 
 Port state is not remembered across hub restarts.
 
+## Case
+
+<img src="images/usb-ppps-hub-case.png" alt="USB PPPS Hub case" width="640">
+
+Print the base and lid using the files in `usb-ppps-hub-case.zip` in [Releases](../../releases). Use PLA with no supports.
+
+Fit the board onto the base's pegs and press the lid on until it clicks. To remove the lid, lever it up using the notch in the left end.
+
 ## Design
 
 [Schematic (PDF)](../../releases/latest/download/usb-ppps-hub-schematic.pdf)

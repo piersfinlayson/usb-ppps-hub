@@ -13,8 +13,10 @@ Install:
 - Poppler, for the PNG renders (`brew install poppler` on macOS, `poppler-utils` on Linux)
 - CMake and the Arm GNU Toolchain (`arm-none-eabi-gcc`), for the EEPROM programmer
 - [picotool](https://github.com/raspberrypi/picotool) 2.1.1 or later, for programming a hub
+- [OpenSCAD](https://openscad.org/downloads.html#snapshots) development snapshot, for the case (`brew install --cask openscad@snapshot` on macOS)
+- [PrusaSlicer](https://www.prusa3d.com/prusaslicer/), optional, for the case G-code
 
-The scripts use KiCad's default install, and `kicad-cli` from the PATH if it's present. If your KiCad is elsewhere, set these environment variables:
+The scripts use KiCad's default install, and `kicad-cli` from the PATH if it's present. If your KiCad, OpenSCAD or PrusaSlicer is elsewhere, set these environment variables:
 
 | Variable | Path |
 | --- | --- |
@@ -22,6 +24,8 @@ The scripts use KiCad's default install, and `kicad-cli` from the PATH if it's p
 | `KICAD_PYTHON` | Python with KiCad's `pcbnew` module |
 | `KICAD9_SYMBOL_DIR` | KiCad's stock symbol libraries |
 | `KICAD9_FOOTPRINT_DIR` | KiCad's stock footprint libraries |
+| `OPENSCAD` | `openscad` |
+| `PRUSASLICER` | PrusaSlicer |
 
 `scripts/kicad-python` runs a script using KiCad's Python.
 
@@ -99,11 +103,30 @@ scripts/crop_pcb.sh build top 30 10 45 30
 
 This writes `build/top-crop.png` at 1200 dpi, or at `DPI` if set, from x0 y0 to x1 y1 in mm from the board's top left. The second argument is `top`, `bottom` or `power`.
 
-When the board changes, update the board render in the README after running `generate.sh`:
+When the board or case changes, update the renders in the README after running `generate.sh`:
 
 ```bash
 scripts/render.sh
 ```
+
+## Case
+
+The case design is `case/usb-ppps-hub-case.scad`. Its specification is in [spec.md](spec.md#case).
+
+```bash
+scripts/case.sh build/usb-ppps-hub.kicad_pcb build/case
+```
+
+This:
+
+- reads the board's size and its hole, connector and LED positions from the PCB into `build/case/board.scad`
+- writes the base and lid STLs
+- fails if the board, base and lid overlap
+- writes G-code files for the for an Original Prusa MK3S with Prusament PLA, 0.20mm SPEED and 15% infill, if PrusaSlicer is installed.
+
+`check_all.sh` runs it.
+
+To see the case, open `build/case/usb-ppps-hub-case.scad` in OpenSCAD and set `part`. Edit `case/usb-ppps-hub-case.scad`, because `case.sh` overwrites the copy.
 
 ## Version, Commit and Source Location
 
@@ -174,7 +197,9 @@ If a part is rotated or shifted in JLC's preview, add a correction for its LCSC 
 scripts/check_all.sh build
 ```
 
-This runs the schematic and board checks and builds the EEPROM image. CI runs it with KiCad 9.0.7 and then `scripts/build_programmer.sh --clean`.
+This runs the schematic, board and case checks and builds the EEPROM image. CI runs it with KiCad 9.0.7 and the OpenSCAD 2026.10.11 snapshot and then `scripts/build_programmer.sh --clean`.
+
+OpenSCAD deletes its snapshots after about a year. When CI fails to download the snapshot, change it in both workflows to a newer one.
 
 ## Releasing
 
@@ -192,6 +217,7 @@ The Release workflow creates a GitHub release with the changelog section as its 
 - `usb-ppps-hub-eeprom.bin`
 - `usb-ppps-hub-schematic.pdf`
 - `usb-ppps-hub-kicad.zip`, the KiCad project with LICENSE and NOTICE
+- `usb-ppps-hub-case.zip`, the case STLs with LICENSE and NOTICE
 - `usb-ppps-hub-programmer.zip`, the EEPROM programmer with `program.py`
 
 `scripts/release.sh v0.1.0` writes the same files to `build/release/`.
@@ -225,7 +251,10 @@ The UK HS code for a USB hub is 8471 80 00 00.
 | `scripts/crop_pcb.sh` | PCB region render script |
 | `scripts/jlc.py` | JLCPCB Gerber, BOM and CPL writer |
 | `scripts/eeprom.py` | EEPROM image writer |
-| `scripts/render.sh` | Board render script |
+| `scripts/render.sh` | Board and case render script |
+| `scripts/case.sh` | Case build and check script |
+| `scripts/case_board.py` | Board position writer for the case |
+| `scripts/case_fit.py` | Case fit check |
 | `scripts/kicad_paths.py` | KiCad locations for the Python scripts |
 | `scripts/kicad.sh` | KiCad locations for the shell scripts |
 | `scripts/kicad-python` | Script runner using KiCad's Python |
@@ -237,12 +266,16 @@ The UK HS code for a USB hub is 8471 80 00 00.
 | `programmer/main.c` | EEPROM programmer firmware |
 | `programmer/CMakeLists.txt` | EEPROM programmer build configuration |
 | `programmer/program.py` | Hub programming script using an EEPROM image |
+| `case/usb-ppps-hub-case.scad` | Case design |
+| `case/Montserrat-ExtraBold.ttf` | Lid text font |
+| `case/Montserrat-OFL.txt` | Lid text font licence |
 | `scripts/changelog.py` | Changelog section printer |
 | `.github/workflows/` | GitHub Actions check and release workflows |
 | `kicad/` | Generated KiCad project and schematic PDF |
 | `jlc/` | Generated JLCPCB Gerbers, BOM and CPL |
 | `usb-ppps-hub-eeprom.bin` | Generated EEPROM image |
 | `images/usb-ppps-hub.png` | Generated board render |
+| `images/usb-ppps-hub-case.png` | Generated case render |
 | `kicad-src/usb-ppps-hub.kicad_pro` | KiCad project with net classes, ERC exclusions, board design settings and the `COMMIT` default |
 | `kicad-src/usb-ppps-hub.kicad_sym` | Project symbol library |
 | `kicad-src/sym-lib-table` | Symbol library table |

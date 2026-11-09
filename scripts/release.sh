@@ -21,6 +21,12 @@ cp -R kicad/. LICENSE NOTICE "$D/$P/"
 rm -f "$D/$P/$P.kicad_prl" "$D/$P/$P-schematic.pdf"
 (cd "$D" && python3 -m zipfile -c "$P-kicad.zip" "$P")
 rm -r "${D:?}/$P"
+rm -rf "${D:?}/case" "${D:?}/case-build"
+scripts/case.sh kicad/$P.kicad_pcb "$D/case-build"
+mkdir "$D/case"
+cp "$D/case-build/$P-case-base.stl" "$D/case-build/$P-case-lid.stl" LICENSE NOTICE "$D/case/"
+(cd "$D" && python3 -m zipfile -c "$P-case.zip" case)
+rm -r "${D:?}/case" "${D:?}/case-build"
 scripts/build_programmer.sh --clean
 rm -rf "${D:?}/programmer"
 mkdir "$D/programmer"

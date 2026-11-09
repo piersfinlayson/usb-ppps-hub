@@ -184,3 +184,21 @@ A 4-layer board on a JLC impedance-controlled stackup, with a solid ground plane
 - **TPS2116:** input and output caps close to the device, and wide VIN1, VIN2, VOUT and GND traces, following the datasheet layout example.
 - **Connectors:** the `usb-ppps-hub:USB_C_connector_c2765186` footprint for C2765186, from the project footprint library.
 - **Silkscreen:** the board's name, copyright, version and the Git commit the Gerbers were generated from, up the right edge. https://piers.rocks up the left edge between the programming header and the bottom left mounting hole. [NOTICE](NOTICE) requires it on every board.
+
+## Case
+
+A 3D-printed base and lid, 79.6 × 54.6 × 15.9 mm. The board drops into the base from above.
+
+- **Walls, floor and lid:** 2 mm thick.
+- **Clearance:** 0.3 mm from the board to the walls. 1.5 mm from the 100 µF cap to the lid.
+- **Pegs:** one under each mounting hole. Each is a 6 mm shoulder 3 mm high that the board sits on, with a 3.0 mm tip through the hole.
+- **Lid tubes:** four 6 mm tubes press the board onto the peg shoulders.
+- **Connector openings:** 12.6 × 6.8 mm, centred on each USB-C connector. This is large enough for a USB-C plug overmold of up to 12.35 × 6.5 mm.
+- **Opening corners:** rounded at the bottom and square at the top, so the top prints as one bridge.
+- **Lid fit:** a 2 mm deep lip inside the walls, ending above the connector openings. A bead on the lip clicks into a groove in the walls.
+- **Lid notch:** in the left wall, for levering the lid off.
+- **LEDs:** a 2.5 mm hole above each LED, with a tube down to 0.5 mm above it. A tube beside a connector is cut away where it would come within 0.5 mm of the connector.
+- **Text:** HOST, 5V IN and 1 to 4, in Montserrat ExtraBold, recessed 1.0 mm into the lid with strokes at least 1 mm wide.
+- **Vents:** none. The board dissipates about 1 W.
+- **Programming header:** no opening. The EEPROM is programmed before the board goes in the case.
+- **Printing:** PLA without supports, the lid upside down.
